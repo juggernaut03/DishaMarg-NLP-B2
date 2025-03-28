@@ -6,3 +6,4 @@ Anuj Khude
 Ashutosh Khedkar
 Gaurav Patil
 Thanushree Nair
+Aditya Mahajan
