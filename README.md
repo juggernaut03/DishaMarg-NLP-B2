@@ -130,5 +130,9 @@ Gaurav Pawar - work@gauravpawar.in
 -Sejal JaiswarJaiswar
 -Joel Joymon
 -Indraneel Patil
-Neha Jadhav
-Tanaya Kurkute
+-Neha Jadhav
+-Tanaya Kurkute
+-Sushant Lale
+-Ujjwal Patil
+-Nupur Patil
+-Harish Nair
