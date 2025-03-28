@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Under Development | DishaMarg</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Three.js and related libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <!-- Custom Stylesheets -->
+    <link rel="stylesheet" href="chatbot-styles.css">
+    <style>
+        body {
+            background-color: #000;
+            color: white;
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+        }
+        
+        .dark-card {
+            background-color: #1a1a1a;
+            border-radius: 20px;
+        }
+        
+        .gradient-card {
+            background: linear-gradient(90deg, #6c63ff 0%, #5f5cc5 100%);
+            border-radius: 20px;
+        }
+        
+        .button-with-arrow {
+            display: flex;
+            align-items: center;
+            background-color: rgba(0, 0, 0, 0.4);
+            padding: 10px 20px;
+            border-radius: 30px;
+            transition: all 0.3s;
+            color: white;
+        }
+        
+        .button-with-arrow:hover {
+            background-color: rgba(0, 0, 0, 0.6);
+        }
+        
+        .arrow-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+            background-color: #7CFC00;
+            border-radius: 50%;
+            margin-left: 10px;
+        }
+        
+        .menu-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .menu-button:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .gradient-button {
+            display: flex;
+            align-items: center;
+            background: linear-gradient(90deg, #6c63ff 0%, #5f5cc5 100%);
+            color: white;
+            font-size: medium;
+            border-radius: 30px;
+            transition: all 0.3s;
+            padding: 12px 24px;
+        }
+        
+        .gradient-button:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.7;
+            }
+        }
+        
+        .rocket {
+            animation: floating 4s ease-in-out infinite;
+            transform-origin: center;
+        }
+        
+        @keyframes floating {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+        
+        .code-line {
+            display: inline-block;
+            height: 20px;
+            margin: 5px 0;
+            background: linear-gradient(90deg, #6c63ff, transparent);
+            border-radius: 4px;
+            animation: typing 2s ease-in-out infinite;
+        }
+        
+        @keyframes typing {
+            0% {
+                width: 0%;
+            }
+            50% {
+                width: 100%;
+            }
+            100% {
+                width: 0%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header Navigation -->
+    <header class="flex justify-between items-center py-4 px-6 md:px-16 border-b border-gray-800">
+        <div class="logo flex items-center">
+            <span class="text-3xl font-bold">
+                <span class="text-blue-500">Disha</span>Marg
+            </span>
+        </div>
+        
+        <div class="flex items-center space-x-4">
+            <button class="button-with-arrow" onclick="window.location.href='HomePage.html'">
+                Back to Home
+                <span class="arrow-icon">
+                    <i class="fas fa-arrow-left text-sm text-black"></i>
+                </span>
+            </button>
+            <button class="menu-button">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-6 md:px-16 py-12">
+        <!-- Under Development Section -->
+        <div class="dark-card p-8 mb-8 max-w-4xl mx-auto text-center">
+            <div class="flex justify-center mb-6">
+                <div class="rocket">
+                    <i class="fas fa-rocket text-6xl text-blue-500"></i>
+                </div>
+            </div>
+            
+            <h1 class="text-4xl font-bold text-blue-500 mb-4">Under Development</h1>
+            <p class="text-xl text-gray-400 mb-8">We're working hard to build something amazing for you</p>
+            
+            <div class="flex flex-col items-center mb-8">
+                <div class="w-3/4 bg-gray-800 rounded-lg p-6 flex flex-col items-start">
+                    <div class="code-line w-3/4 bg-opacity-30"></div>
+                    <div class="code-line w-2/3 bg-opacity-30" style="animation-delay: 0.5s;"></div>
+                    <div class="code-line w-4/5 bg-opacity-30" style="animation-delay: 1s;"></div>
+                    <div class="code-line w-1/2 bg-opacity-30" style="animation-delay: 1.5s;"></div>
+                </div>
+            </div>
+            
+            <div class="flex justify-center flex-wrap gap-4 mb-8">
+                <div class="flex items-center bg-gray-800 p-3 rounded-lg">
+                    <div class="bg-green-500 rounded-full w-3 h-3 mr-2 animate-pulse"></div>
+                    <span>Design</span>
+                </div>
+                <div class="flex items-center bg-gray-800 p-3 rounded-lg">
+                    <div class="bg-yellow-500 rounded-full w-3 h-3 mr-2 animate-pulse"></div>
+                    <span>Coding</span>
+                </div>
+                <div class="flex items-center bg-gray-800 p-3 rounded-lg">
+                    <div class="bg-blue-500 rounded-full w-3 h-3 mr-2 animate-pulse"></div>
+                    <span>Testing</span>
+                </div>
+                <div class="flex items-center bg-gray-800 p-3 rounded-lg">
+                    <div class="bg-red-500 rounded-full w-3 h-3 mr-2 animate-pulse"></div>
+                    <span>Deployment</span>
+                </div>
+            </div>
+
+            <div class="gradient-card p-6 mb-8">
+                <h2 class="text-xl font-bold mb-3">Feature Highlights Coming Soon</h2>
+                <p class="text-gray-200">We're crafting intuitive tools to enhance your career development journey.</p>
+            </div>
+            
+            <div class="flex justify-center">
+                <button onclick="window.location.href='HomePage.html'" class="gradient-button">
+                    <span>Return to Home</span>
+                    <i class="fas fa-home ml-2"></i>
+                </button>
+            </div>
+        </div>
+        
+     
+    </main>
+
+    <!-- Chatbot Button and Popup -->
+    <div class="chatbot-button" id="chatbot-button">
+        <i class="fas fa-robot"></i>
+    </div>
+
+    <!-- Chatbot Popup -->
+    <div class="chatbot-popup" id="chatbot-popup">
+        <div class="chatbot-header">
+            <div class="chatbot-title">
+                <span>AI Assistant</span>
+                <div class="speaking-animation" id="speaking-indicator" style="display: none;">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+            <div class="chatbot-close" id="chatbot-close">&times;</div>
+        </div>
+        
+        <div class="chatbot-body">
+            <div class="robot-container">
+                <!-- Loading indicator for the 3D model -->
+                <div class="model-loading" id="model-loading">
+                    <div class="spinner"></div>
+                </div>
+                
+                <!-- Canvas for 3D robot model -->
+                <canvas id="robot-canvas"></canvas>
+                
+                <!-- Audio controls -->
+                <div class="audio-controls">
+                    <button class="audio-button" id="speak-btn" title="Speak">
+                        <i class="fas fa-volume-up"></i>
+                    </button>
+                    <button class="audio-button" id="mute-btn" title="Mute" style="display: none;">
+                        <i class="fas fa-volume-mute"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="chat-messages" id="chat-messages">
+                <div class="message assistant-message">
+                    <p id="assistant-text">This page is still under development, but I can help answer any questions about its upcoming features or direct you to available sections!</p>
+                </div>
+                <!-- Messages will be added here dynamically -->
+            </div>
+            
+            <div class="chat-input">
+                <input type="text" id="user-input" placeholder="Type your message..." />
+                <button id="send-button">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chatbot JavaScript -->
+    <script src="chatbot.js"></script>
+</body>
+</html>
