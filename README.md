@@ -114,14 +114,14 @@ Gaurav Pawar - work@gauravpawar.in
 
 ## DEVELOPERS
 - Gaurav Pawar (juggernaut03) Lead
-Utsav Khairnar 
-Gaurav Pawar
-Saumya Nair
-Komal Mhaske
-Anuj Khude
-Ashutosh Khedkar
-Gaurav Patil
-Thanushree Nair
-Aditya Mahajan
-Soham Mhatre
-Dhanish Nair 
+-Utsav Khairnar 
+-Gaurav Pawar
+-Saumya Nair
+-Komal Mhaske
+-Anuj Khude
+-Ashutosh Khedkar
+-Gaurav Patil
+-Thanushree Nair
+-Aditya Mahajan
+-Soham Mhatre
+-Dhanish Nair 
