@@ -1,4 +1,4 @@
-# DishaMarg - AI-Powered Career Navigation Platform
+umm# DishaMarg - AI-Powered Career Navigation Platform
 
 DishaMarg is an innovative web application designed to empower professionals and students in their career development journey through intelligent, AI-driven guidance and tools.
 
@@ -130,4 +130,5 @@ Gaurav Pawar - work@gauravpawar.in
 -Sejal JaiswarJaiswar
 -Joel Joymon
 -Indraneel Patil
-
+Neha Jadhav
+Tanaya Kurkute
