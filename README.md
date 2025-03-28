@@ -48,7 +48,7 @@ DishaMarg is an innovative web application designed to empower professionals and
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/your-username/dishamarg.git
+git clone https://github.com/Dtrea04/dishamarg.git
 cd dishamarg
 ```
 
