@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skill Gap Analyzer | DishaMarg</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Three.js and related libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <!-- Web Speech API polyfill -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-speech-browser-sdk/1.18.0/speech.browser.sdk.min.js"></script>
+    <!-- Custom Stylesheets -->
+    <link rel="stylesheet" href="chatbot-styles.css">
+    <style>
+        body {
+            background-color: #000;
+            color: white;
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+        }
+        
+        .progress-circle {
+            position: relative;
+            width: 60px;
+            height: 60px;
+        }
+        
+        .progress-circle svg {
+            transform: rotate(-90deg);
+        }
+        
+        .progress-circle circle {
+            fill: none;
+            stroke-width: 6;
+        }
+        
+        .progress-circle .bg {
+            stroke: rgba(255, 255, 255, 0.1);
+        }
+        
+        .progress-circle .progress {
+            stroke: #6c63ff;
+            stroke-linecap: round;
+        }
+        
+        .progress-circle .text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .gradient-card {
+            background: linear-gradient(90deg, #6c63ff 0%, #5f5cc5 100%);
+            border-radius: 20px;
+        }
+        
+        .dark-card {
+            background-color: #1a1a1a;
+            border-radius: 20px;
+        }
+        
+        .button-with-arrow {
+            display: flex;
+            align-items: center;
+            background-color: rgba(0, 0, 0, 0.4);
+            padding: 10px 20px;
+            border-radius: 30px;
+            transition: all 0.3s;
+        }
+        
+        .button-with-arrow:hover {
+            background-color: rgba(0, 0, 0, 0.6);
+        }
+        
+        .arrow-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+            background-color: #7CFC00;
+            border-radius: 50%;
+            margin-left: 10px;
+        }
+        
+        .menu-button, .settings-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .menu-button:hover, .settings-button:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .plus-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 35px;
+            height: 35px;
+            background-color: #7CFC00;
+            border-radius: 50%;
+            color: black;
+            font-size: 18px;
+            margin-left: auto;
+        }
+        
+        .module-item {
+            border-left: 3px solid #6c63ff;
+            transition: all 0.3s;
+        }
+        
+        .module-item:hover {
+            background-color: rgba(108, 99, 255, 0.1);
+            transform: translateX(5px);
+        }
+        
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background-color: #1a1a1a;
+            padding: 30px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .close-button {
+            float: right;
+            font-size: 24px;
+            cursor: pointer;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- API Key Settings Modal -->
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold">API Settings</h2>
+                <span class="close-button" id="closeSettings">&times;</span>
+            </div>
+            <div class="mb-6">
+                <label for="apiKey" class="block text-gray-300 mb-2">Gemini API Key</label>
+                <input type="password" id="apiKey" class="w-full bg-black border border-gray-700 rounded-lg px-4 py-2 text-white" placeholder="Enter your API key...">
+                <p class="text-gray-400 text-sm mt-2">Your API key is stored locally and never sent to our servers.</p>
+            </div>
+            <div class="flex items-center gap-2 mb-6">
+                <input type="checkbox" id="rememberKey" class="rounded border-gray-700">
+                <label for="rememberKey" class="text-gray-300">Remember API key</label>
+            </div>
+            <button id="saveApiKey" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg transition">Save Settings</button>
+        </div>
+    </div>
+
+    <!-- Header Navigation -->
+    <header class="flex justify-between items-center py-4 px-6 md:px-16 border-b border-gray-800">
+        <div class="logo flex items-center">
+            <span class="text-3xl font-bold">
+                <span class="text-blue-500">Disha</span>Marg
+            </span>
+        </div>
+        
+        <div class="flex items-center space-x-4">
+            <button class="button-with-arrow" id="enterAnalyzerBtn">
+                Enter Skill Gap Analyzer
+                <span class="arrow-icon">
+                    <i class="fas fa-arrow-right text-sm text-black"></i>
+                </span>
+            </button>
+            
+            <button class="settings-button" id="openSettings">
+                <i class="fas fa-cog"></i>
+            </button>
+            
+            <button class="menu-button">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </header>
+    
+    <!-- Main Content -->
+    <main class="py-8 px-6 md:px-16">
+        <!-- Welcome Section -->
+        <section class="mb-8">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-4xl md:text-5xl font-bold mb-2">Hello, Champ !</h1>
+                    <p class="text-gray-400">Track your skills progress and identify improvement opportunities</p>
+                </div>
+                <div class="hidden md:block">
+                    <i class="fas fa-arrow-right text-4xl text-blue-500"></i>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Main Card -->
+        <section class="mb-8">
+            <div class="gradient-card p-8 flex flex-col md:flex-row">
+                <div class="md:w-2/3 mb-6 md:mb-0">
+                    <h2 class="text-3xl font-bold mb-6">Skill Gap Analysis</h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-black bg-opacity-30 rounded-xl p-6">
+                            <h3 class="text-xl font-semibold mb-2">Current Skills</h3>
+                            <div class="flex flex-wrap gap-2 mt-4">
+                                <span class="px-3 py-1 bg-white bg-opacity-10 rounded-full text-sm">JavaScript</span>
+                                <span class="px-3 py-1 bg-white bg-opacity-10 rounded-full text-sm">React</span>
+                                <span class="px-3 py-1 bg-white bg-opacity-10 rounded-full text-sm">Node.js</span>
+                                <span class="px-3 py-1 bg-white bg-opacity-10 rounded-full text-sm">HTML/CSS</span>
+                                <span class="px-3 py-1 bg-white bg-opacity-10 rounded-full text-sm">Git</span>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-black bg-opacity-30 rounded-xl p-6">
+                            <h3 class="text-xl font-semibold mb-2">Missing Skills</h3>
+                            <div class="flex flex-wrap gap-2 mt-4">
+                                <span class="px-3 py-1 bg-red-500 bg-opacity-20 text-red-400 rounded-full text-sm">TypeScript</span>
+                                <span class="px-3 py-1 bg-red-500 bg-opacity-20 text-red-400 rounded-full text-sm">GraphQL</span>
+                                <span class="px-3 py-1 bg-red-500 bg-opacity-20 text-red-400 rounded-full text-sm">AWS</span>
+                                <span class="px-3 py-1 bg-red-500 bg-opacity-20 text-red-400 rounded-full text-sm">Docker</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6">
+                        <button class="button-with-arrow" id="analyzeSkillsBtn">
+                            Analyze My Skills
+                            <span class="arrow-icon">
+                                <i class="fas fa-arrow-right text-sm text-black"></i>
+                            </span>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="md:w-1/3 flex items-center justify-center">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2103/2103658.png" alt="Skills Analysis" class="w-48 h-auto">
+                </div>
+            </div>
+        </section>
+        
+        <!-- Available Modules Section -->
+        <section class="mb-8 dark-card p-6">
+            <h2 class="text-2xl font-bold mb-4">Available Modules</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <a href="skill.html" class="module-item p-4 pl-6 block">
+                    <h3 class="font-semibold text-lg">Skills Assessment</h3>
+                    <p class="text-gray-400 text-sm">Analyze your current skills and identify gaps</p>
+                </a>
+                <a href="LearningPath.html" class="module-item p-4 pl-6 block">
+                    <h3 class="font-semibold text-lg">Learning Paths</h3>
+                    <p class="text-gray-400 text-sm">Get personalized learning recommendations</p>
+                </a>
+                <a href="ResumeBuilder.html" class="module-item p-4 pl-6 block">
+                    <h3 class="font-semibold text-lg">Resume Builder</h3>
+                    <p class="text-gray-400 text-sm">Create a professional resume focused on your skills</p>
+                </a>
+                <a href="job-matching.html" class="module-item p-4 pl-6 block">
+                    <h3 class="font-semibold text-lg">Job Matching</h3>
+                    <p class="text-gray-400 text-sm">Find jobs that match your current skill set</p>
+                </a>
+                <a href="progress-tracking.html" class="module-item p-4 pl-6 block">
+                    <h3 class="font-semibold text-lg">Progress Tracking</h3>
+                    <p class="text-gray-400 text-sm">Monitor your skill development over time</p>
+                </a>
+                <a href="mentoring-sessions.html" class="module-item p-4 pl-6 block">
+                    <h3 class="font-semibold text-lg">Mentoring Sessions</h3>
+                    <p class="text-gray-400 text-sm">Connect with mentors in your field</p>
+                </a>
+            </div>
+        </section>
+        
+    </main>
+
+    <!-- Chatbot Button and Popup -->
+    <div class="chatbot-button" id="chatbot-button">
+        <i class="fas fa-robot"></i>
+    </div>
+
+    <!-- Chatbot Popup -->
+    <div class="chatbot-popup" id="chatbot-popup">
+        <div class="chatbot-header">
+            <div class="chatbot-title">
+                <span>AI Assistant</span>
+                <div class="speaking-animation" id="speaking-indicator" style="display: none;">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+            <div class="chatbot-close" id="chatbot-close">&times;</div>
+        </div>
+        
+        <div class="chatbot-body">
+            <div class="robot-container">
+                <!-- Loading indicator for the 3D model -->
+                <div class="model-loading" id="model-loading">
+                    <div class="spinner"></div>
+                </div>
+                
+                <!-- Canvas for 3D robot model -->
+                <canvas id="robot-canvas"></canvas>
+                
+                <!-- Audio controls -->
+                <div class="audio-controls">
+                    <button class="audio-button" id="speak-btn" title="Speak">
+                        <i class="fas fa-volume-up"></i>
+                    </button>
+                    <button class="audio-button" id="mute-btn" title="Mute" style="display: none;">
+                        <i class="fas fa-volume-mute"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="chat-messages" id="chat-messages">
+                <div class="message assistant-message">
+                    <p id="assistant-text">Welcome to the Skill Gap Analyzer! I can help you identify missing skills for your desired job role and suggest personalized learning paths.</p>
+                </div>
+                <!-- Messages will be added here dynamically -->
+            </div>
+            
+            <div class="chat-input">
+                <input type="text" id="user-input" placeholder="Type your message..." />
+                <button id="send-button">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main page JavaScript -->
+    <script>
+        // Initialize settings modal functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Setup modal functionality
+            const settingsModal = document.getElementById('settingsModal');
+            const openSettingsBtn = document.getElementById('openSettings');
+            const closeSettingsBtn = document.getElementById('closeSettings');
+            const saveApiKeyBtn = document.getElementById('saveApiKey');
+            const apiKeyInput = document.getElementById('apiKey');
+            const rememberKeyCheckbox = document.getElementById('rememberKey');
+            
+            // Load saved API key from localStorage if available
+            const savedApiKey = localStorage.getItem('geminiApiKey');
+            if (savedApiKey) {
+                apiKeyInput.value = savedApiKey;
+                rememberKeyCheckbox.checked = true;
+            }
+            
+            // Setup event listeners
+            openSettingsBtn.addEventListener('click', function() {
+                settingsModal.style.display = 'flex';
+            });
+            
+            closeSettingsBtn.addEventListener('click', function() {
+                settingsModal.style.display = 'none';
+            });
+            
+            window.addEventListener('click', function(event) {
+                if (event.target === settingsModal) {
+                    settingsModal.style.display = 'none';
+                }
+            });
+            
+            saveApiKeyBtn.addEventListener('click', function() {
+                const apiKey = apiKeyInput.value.trim();
+                
+                if (apiKey) {
+                    if (rememberKeyCheckbox.checked) {
+                        localStorage.setItem('geminiApiKey', apiKey);
+                    } else {
+                        localStorage.removeItem('geminiApiKey');
+                    }
+                    
+                    // Update geminiApi with the new key if it exists
+                    if (window.geminiApi) {
+                        window.geminiApi.initialize(apiKey);
+                    }
+                    
+                    alert('API key saved successfully!');
+                    settingsModal.style.display = 'none';
+                } else {
+                    alert('Please enter a valid API key');
+                }
+            });
+            
+            // Navigation buttons
+            document.getElementById('enterAnalyzerBtn').addEventListener('click', function() {
+                window.location.href = 'skill.html';
+            });
+            
+            document.getElementById('analyzeSkillsBtn').addEventListener('click', function() {
+                window.location.href = 'skill.html';
+            });
+        });
+
+        // Preload the 3D model
+        document.addEventListener('DOMContentLoaded', function() {
+            const modelPath = './robo.glb';
+            const preloadLink = document.createElement('link');
+            preloadLink.rel = 'preload';
+            preloadLink.href = modelPath;
+            preloadLink.as = 'fetch';
+            preloadLink.crossOrigin = 'anonymous';
+            document.head.appendChild(preloadLink);
+        });
+    </script>
+
+    <!-- Chatbot JavaScript -->
+    <script src="chatbot.js"></script>
+</body>
+</html>
