@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume Builder | DishaMarg</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Three.js and related libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <!-- jsPDF library for PDF generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- Web Speech API polyfill -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-speech-browser-sdk/1.18.0/speech.browser.sdk.min.js"></script>
+    <!-- Custom Stylesheets -->
+    <link rel="stylesheet" href="chatbot-styles.css">
+</head>
+<body class="bg-black text-white min-h-screen font-['Inter','Segoe_UI',sans-serif]">
+    <!-- Header Navigation -->
+    <header class="flex justify-between items-center py-4 px-6 md:px-16 border-b border-gray-800">
+        <div class="logo flex items-center">
+            <span class="text-3xl font-bold">
+                <span class="text-blue-500">Disha</span>Marg
+            </span>
+        </div>
+        
+        <div class="flex items-center space-x-4">
+            <button class="button-with-arrow" onclick="window.location.href='HomePage.html'">
+                Back to Home
+                <span class="arrow-icon">
+                    <i class="fas fa-arrow-left text-sm text-black"></i>
+                </span>
+            </button>
+            <button class="menu-button">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </header>
+
+    <div class="container mx-auto px-6 md:px-16 py-8">
+        <!-- Title Section -->
+        <section class="mb-8 text-center">
+            <h1 class="text-4xl font-bold text-blue-500 mb-2">Resume Builder</h1>
+            <p class="text-gray-400 max-w-2xl mx-auto">Create a professional resume tailored to your skills and target job role</p>
+        </section>
+
+        <!-- Progress Steps -->
+        <section class="mb-12">
+            <div class="flex justify-between max-w-4xl mx-auto">
+                <div class="progress-step">
+                    <div class="step-circle active" id="step1-circle">1</div>
+                    <div class="step-label active" id="step1-label">Personal Info</div>
+                </div>
+                <div class="progress-step">
+                    <div class="step-circle" id="step2-circle">2</div>
+                    <div class="step-label" id="step2-label">Education & Work</div>
+                </div>
+                <div class="progress-step">
+                    <div class="step-circle" id="step3-circle">3</div>
+                    <div class="step-label" id="step3-label">Skills & Projects</div>
+                </div>
+                <div class="progress-step">
+                    <div class="step-circle" id="step4-circle">4</div>
+                    <div class="step-label" id="step4-label">Generate Resume</div>
+                </div>
+                <div class="progress-step">
+                    <div class="step-circle" id="step5-circle">5</div>
+                    <div class="step-label" id="step5-label">Download</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Step 1: Personal Information -->
+        <section id="step1" class="dark-card p-6 mb-8 mx-auto max-w-4xl">
+            <h2 class="text-2xl font-semibold mb-6">Personal Information</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="mb-4">
+                    <label for="fullName" class="block text-gray-300 font-medium mb-2">Full Name*</label>
+                    <input type="text" id="fullName" placeholder="John Doe" 
+                        class="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white">
+                </div>
+                
+                <div class="mb-4">
+                    <label for="jobTitle" class="block text-gray-300 font-medium mb-2">Professional Title*</label>
+                    <input type="text" id="jobTitle" placeholder="e.g. Frontend Developer" 
+                        class="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white">
+                </div>
+                
+                <div class="mb-4">
+                    <label for="email" class="block text-gray-300 font-medium mb-2">Email*</label>
+                    <input type="email" id="email" placeholder="john.doe@example.com" 
+                        class="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white">
+                </div>
+                
+                <div class="mb-4">
+                    <label for="phone" class="block text-gray-300 font-medium mb-2">Phone Number*</label>
+                    <input type="tel" id="phone" placeholder="+1 (555) 123-4567" 
+                        class="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white">
+                </div>
+                
+                <div class="mb-4">
+                    <label for="location" class="block text-gray-300 font-medium mb-2">Location*</label>
+                    <input type="text" id="location" placeholder="City, Country" 
+                        class="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white">
+                </div>
+                
+                <div class="mb-4">
+                    <label for="portfolio" class="block text-gray-300 font-medium mb-2">Portfolio/Website</label>
+                    <input type="url" id="portfolio" placeholder="https://yourportfolio.com" 
+                        class="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white">
+                </div>
+                
+                <div class="mb-4">
+                    <label for="linkedin" class="block text-gray-300 font-medium mb-2">LinkedIn</label>
+                    <input type="url" id="linkedin" placeholder="https://linkedin.com/in/johndoe" 
+                        class="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white">
+                </div>
+                
+                <div class="mb-4">
+                    <label for="github" class="block text-gray-300 font-medium mb-2">GitHub</label>
+                    <input type="url" id="github" placeholder="https://github.com/johndoe" 
+                        class="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white">
+                </div>
+            </div>
+            
+            <div class="mb-6">
+                <label for="professionalSummary" class="block text-gray-300 font-medium mb-2">Professional Summary*</label>
+                <textarea id="professionalSummary" rows="4" placeholder="Brief description of your professional background and career goals..." 
+                    class="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"></textarea>
+                <p class="text-xs text-gray-500 mt-1">
+                    <span id="professionalSummaryCount">0</span>/300 characters (recommended: 150-300)
+                </p>
+            </div>
+            
+            <div class="text-center mt-8">
+                <button onclick="goToStep2()" class="gradient-button" id="step1-next">
+                    <span>Continue to Education & Work</span>
+                    <i class="fas fa-arrow-right ml-2"></i>
+                </button>
+            </div>
+        </section>
+        
+        <!-- Step 2: Education & Work History -->
+        <section id="step2" class="dark-card p-6 mb-8 mx-auto max-w-4xl hidden">
+            <h2 class="text-2xl font-semibold mb-6">Education & Work History</h2>
+            
+            <!-- Education Section -->
+            <div class="mb-8">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-medium text-blue-400">Education</h3>
+                    <button onclick="addEducation()" class="px-3 py-1 bg-blue-700 hover:bg-blue-600 rounded-lg text-white text-sm">
+                        <i class="fas fa-plus mr-1"></i>Add Education
+                    </button>
+                </div>
+                
+                <div id="education-container">
+                    <div class="education-item bg-gray-800 p-4 rounded-lg mb-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-gray-300 text-sm mb-1">Degree/Certificate*</label>
+                                <input type="text" class="education-degree w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white text-sm" placeholder="e.g. Bachelor of Science in Computer Science">
+                            </div>
+                            <div>
+                                <label class="block text-gray-300 text-sm mb-1">Institution*</label>
+                                <input type="text" class="education-institution w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white text-sm" placeholder="e.g. University of Technology">
+                            </div>
+                            <div>
+                                <label class="block text-gray-300 text-sm mb-1">Location</label>
+                                <input type="text" class="education-location w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white text-sm" placeholder="e.g. Boston, MA">
+                            </div>
+                            <div class="flex gap-4">
+                                <div class="w-1/2">
+                                    <label class="block text-gray-300 text-sm mb-1">Start Date*</label>
+                                    <input type="month" class="education-start w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white text-sm">
+                                </div>
+                                <div class="w-1/2">
+                                    <label class="block text-gray-300 text-sm mb-1">End Date*</label>
+                                    <input type="month" class="education-end w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white text-sm">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <label class="block text-gray-300 text-sm mb-1">Description / Achievements</label>
+                            <textarea class="education-description w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white text-sm" rows="2" placeholder="e.g. Dean's List, GPA, relevant coursework, achievements"></textarea>
+                        </div>
+                        <div class="text-right mt-2">
+                            <button onclick="removeEducation(this)" class="text-red-400 hover:text-red-300 text-sm">
+                                <i class="fas fa-trash-alt mr-1"></i>Remove
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Work Experience Section -->
+            <div class="mb-8">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-medium text-blue-400">Work Experience</h3>
+                    <button onclick="addWorkExperience()" class="px-3 py-1 bg-blue-700 hover:bg-blue-600 rounded-lg text-white text-sm">
+                        <i class="fas fa-plus mr-1"></i>Add Experience
+                    </button>
+                </div>
+                
+                <div id="work-container">
+                    <div class="work-item bg-gray-800 p-4 rounded-lg mb-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-gray-300 text-sm mb-1">Job Title*</label>
+                                <input type="text" class="work-title w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white text-sm" placeholder="e.g. Senior Frontend Developer">
+                            </div>
+                            <div>
+                                <label class="block text-gray-300 text-sm mb-1">Company*</label>
+                                <input type="text" class="work-company w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white text-sm" placeholder="e.g. Tech Innovations Inc.">
+                            </div>
+                            <div>
+                                <label class="block text-gray-300 text-sm mb-1">Location</label>
+                                <input type="text" class="work-location w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white text-sm" placeholder="e.g. San Francisco, CA">
+                            </div>
+                            <div class="flex gap-4">
+                                <div class="w-1/2">
+                                    <label class="block text-gray-300 text-sm mb-1">Start Date*</label>
+                                    <input type="month" class="work-start w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white text-sm">
+                                </div>
+                                <div class="w-1/2">
+                                    <label class="block text-gray-300 text-sm mb-1">End Date*</label>
+                                    <div class="flex items-center">
+                                        <input type="month" class="work-end w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white text-sm">
+                                        <div class="ml-2">
+                                            <input type="checkbox" class="work-current" id="work-current-1">
+                                            <label for="work-current-1" class="text-gray-300 text-sm ml-1">Current</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <label class="block text-gray-300 text-sm mb-1">Responsibilities & Achievements*</label>
+                            <textarea class="work-description w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white text-sm" rows="3" placeholder="Describe your key responsibilities and achievements..."></textarea>
+                            <p class="text-xs text-gray-500 mt-1">Tip: Use bullet points by starting each line with - or *</p>
+                        </div>
+                        <div class="text-right mt-2">
+                            <button onclick="removeWorkExperience(this)" class="text-red-400 hover:text-red-300 text-sm">
+                                <i class="fas fa-trash-alt mr-1"></i>Remove
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex justify-between mt-8">
+                <button onclick="goToStep1()" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg">
+                    <i class="fas fa-arrow-left mr-2"></i>Back
+                </button>
+                <button onclick="goToStep3()" class="gradient-button">
+                    <span>Continue to Skills & Projects</span>
+                    <i class="fas fa-arrow-right ml-2"></i>
+                </button>
+            </div>
+        </section>
+        
+        <!-- Step 3: Skills & Projects -->
+        <section id="step3" class="dark-card p-6 mb-8 mx-auto max-w-4xl hidden">
+            <h2 class="text-2xl font-semibold mb-6">Skills & Projects</h2>
+            
+            <!-- Skills Section -->
+            <div class="mb-8">
+                <h3 class="text-xl font-medium text-blue-400 mb-4">Skills</h3>
+                
+                <div class="mb-6">
+                    <label class="block text-gray-300 font-medium mb-2">Technical Skills*</label>
+                    <div class="flex flex-wrap gap-2 mb-2" id="technical-skills-container">
+                        <!-- Skills tags will be added here dynamically -->
+                    </div>
+                    <div class="flex">
+                        <input type="text" id="technical-skill-input" placeholder="Add a technical skill (e.g. JavaScript)" 
+                            class="flex-1 px-4 py-3 bg-gray-900 border border-gray-700 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white">
+                        <button onclick="addTechnicalSkill()" class="px-4 py-3 bg-blue-700 hover:bg-blue-600 rounded-r-lg text-white">
+                            Add
+                        </button>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1">Tip: Add 5-10 of your most relevant technical skills</p>
+                </div>
+                
+                <div class="mb-6">
+                    <label class="block text-gray-300 font-medium mb-2">Soft Skills</label>
+                    <div class="flex flex-wrap gap-2 mb-2" id="soft-skills-container">
+                        <!-- Skills tags will be added here dynamically -->
+                    </div>
+                    <div class="flex">
+                        <input type="text" id="soft-skill-input" placeholder="Add a soft skill (e.g. Team Leadership)" 
+                            class="flex-1 px-4 py-3 bg-gray-900 border border-gray-700 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white">
+                        <button onclick="addSoftSkill()" class="px-4 py-3 bg-blue-700 hover:bg-blue-600 rounded-r-lg text-white">
+                            Add
+                        </button>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1">Tip: Add 3-5 soft skills that complement your technical abilities</p>
+                </div>
+                
+                <div class="mb-6">
+                    <label class="block text-gray-300 font-medium mb-2">Languages</label>
+                    <div class="flex flex-wrap gap-2 mb-2" id="languages-container">
+                        <!-- Languages tags will be added here dynamically -->
+                    </div>
+                    <div class="flex">
+                        <input type="text" id="language-input" placeholder="Add a language (e.g. English - Native)" 
+                            class="flex-1 px-4 py-3 bg-gray-900 border border-gray-700 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white">
+                        <button onclick="addLanguage()" class="px-4 py-3 bg-blue-700 hover:bg-blue-600 rounded-r-lg text-white">
+                            Add
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Projects Section -->
+            <div class="mb-8">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-medium text-blue-400">Projects</h3>
+                    <button onclick="addProject()" class="px-3 py-1 bg-blue-700 hover:bg-blue-600 rounded-lg text-white text-sm">
+                        <i class="fas fa-plus mr-1"></i>Add Project
+                    </button>
+                </div>
+                
+                <div id="projects-container">
+                    <div class="project-item bg-gray-800 p-4 rounded-lg mb-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-gray-300 text-sm mb-1">Project Name*</label>
+                                <input type="text" class="project-name w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white text-sm" placeholder="e.g. E-commerce Platform">
+                            </div>
+                            <div>
+                                <label class="block text-gray-300 text-sm mb-1">Technologies Used*</label>
+                                <input type="text" class="project-tech w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white text-sm" placeholder="e.g. React, Node.js, MongoDB">
+                            </div>
+                            <div>
+                                <label class="block text-gray-300 text-sm mb-1">Project Link</label>
+                                <input type="url" class="project-link w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white text-sm" placeholder="e.g. https://github.com/yourusername/project">
+                            </div>
+                            <div>
+                                <label class="block text-gray-300 text-sm mb-1">Timeframe</label>
+                                <input type="text" class="project-date w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white text-sm" placeholder="e.g. Jan 2022 - Mar 2022">
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <label class="block text-gray-300 text-sm mb-1">Description*</label>
+                            <textarea class="project-description w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white text-sm" rows="2" placeholder="Describe the project, your role, and key achievements..."></textarea>
+                        </div>
+                        <div class="text-right mt-2">
+                            <button onclick="removeProject(this)" class="text-red-400 hover:text-red-300 text-sm">
+                                <i class="fas fa-trash-alt mr-1"></i>Remove
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex justify-between mt-8">
+                <button onclick="goToStep2()" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg">
+                    <i class="fas fa-arrow-left mr-2"></i>Back
+                </button>
+                <button onclick="goToStep4()" class="gradient-button">
+                    <span>Continue to Generate</span>
+                    <i class="fas fa-arrow-right ml-2"></i>
+                </button>
+            </div>
+        </section>
+        
+        <!-- Step 4: Template Selection & Generation -->
+        <section id="step4" class="dark-card p-6 mb-8 mx-auto max-w-4xl hidden">
+            <h2 class="text-2xl font-semibold mb-6">Generate Your Resume</h2>
+            
+            <!-- Template Selection -->
+            <div class="mb-8">
+                <h3 class="text-xl font-medium text-blue-400 mb-4">Choose a Template</h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="template-card cursor-pointer hover:border-blue-500 border-2 border-transparent p-1 rounded-lg transition-all" onclick="selectTemplate('minimalist')">
+                        <div class="bg-gray-800 p-3 rounded-lg">
+                            <img src="https://via.placeholder.com/300x400?text=Minimalist" alt="Minimalist Template" class="w-full h-auto rounded-lg mb-2">
+                            <div class="flex justify-between items-center">
+                                <h4 class="font-medium">Minimalist</h4>
+                                <div class="template-check hidden">
+                                    <i class="fas fa-check-circle text-green-500"></i>
+                                </div>
+                            </div>
+                            <p class="text-sm text-gray-400">Clean and simple design</p>
+                        </div>
+                    </div>
+                    
+                    <div class="template-card cursor-pointer hover:border-blue-500 border-2 border-transparent p-1 rounded-lg transition-all" onclick="selectTemplate('professional')">
+                        <div class="bg-gray-800 p-3 rounded-lg">
+                            <img src="https://via.placeholder.com/300x400?text=Professional" alt="Professional Template" class="w-full h-auto rounded-lg mb-2">
+                            <div class="flex justify-between items-center">
+                                <h4 class="font-medium">Professional</h4>
+                                <div class="template-check hidden">
+                                    <i class="fas fa-check-circle text-green-500"></i>
+                                </div>
+                            </div>
+                            <p class="text-sm text-gray-400">Traditional corporate style</p>
+                        </div>
+                    </div>
+                    
+                    <div class="template-card cursor-pointer hover:border-blue-500 border-2 border-transparent p-1 rounded-lg transition-all" onclick="selectTemplate('modern')">
+                        <div class="bg-gray-800 p-3 rounded-lg">
+                            <img src="https://via.placeholder.com/300x400?text=Modern" alt="Modern Template" class="w-full h-auto rounded-lg mb-2">
+                            <div class="flex justify-between items-center">
+                                <h4 class="font-medium">Modern</h4>
+                                <div class="template-check hidden">
+                                    <i class="fas fa-check-circle text-green-500"></i>
+                                </div>
+                            </div>
+                            <p class="text-sm text-gray-400">Contemporary with accents</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Additional Optimization Options -->
+            <div class="mb-8">
+                <h3 class="text-xl font-medium text-blue-400 mb-4">Optimization Options</h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="targetJob" class="block text-gray-300 font-medium mb-2">Target Job Role (for optimization)</label>
+                        <input type="text" id="targetJob" placeholder="e.g. Senior Frontend Developer" 
+                            class="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white">
+                        </div>
+                        
+                        <div>
+                            <label for="keywords" class="block text-gray-300 font-medium mb-2">ATS Keywords</label>
+                            <input type="text" id="keywords" placeholder="e.g. React, JavaScript, Agile" 
+                                class="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white">
+                            <p class="text-xs text-gray-500 mt-1">Add keywords to help your resume pass Applicant Tracking Systems</p>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6">
+                        <label class="flex items-center">
+                            <input type="checkbox" id="aiOptimize" class="mr-2 text-blue-500">
+                            <span class="text-gray-300">Use AI to enhance and optimize my resume content</span>
+                        </label>
+                        <p class="text-xs text-gray-500 mt-1 ml-6">Our Gemini-powered AI will improve descriptions and tailor content to your target job role</p>
+                    </div>
+                </div>
+                
+                <!-- Generate Resume Button -->
+                <div class="text-center">
+                    <button onclick="generateResume()" class="gradient-button" id="generate-resume-btn">
+                        <span>Generate Resume</span>
+                        <i class="fas fa-wand-magic-sparkles ml-2"></i>
+                    </button>
+                    <p class="text-xs text-gray-500 mt-2">This may take a few moments</p>
+                </div>
+                
+                <!-- Loading Indicator (Hidden by default) -->
+                <div id="resumeLoadingIndicator" class="hidden flex flex-col items-center justify-center mt-8 p-8">
+                    <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-blue-600 border-solid mb-4"></div>
+                    <p class="text-gray-300">Creating your professional resume...</p>
+                </div>
+                
+                <div class="flex justify-between mt-8">
+                    <button onclick="goToStep3()" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg">
+                        <i class="fas fa-arrow-left mr-2"></i>Back
+                    </button>
+                    <button onclick="goToStep5()" class="gradient-button" id="step4-next" disabled>
+                        <span>Continue to Download</span>
+                        <i class="fas fa-arrow-right ml-2"></i>
+                    </button>
+                </div>
+            </section>
+            
+            <!-- Step 5: Resume Preview & Download -->
+            <section id="step5" class="dark-card p-6 mb-8 mx-auto max-w-4xl hidden">
+                <h2 class="text-2xl font-semibold mb-6">Your Resume</h2>
+                
+                <!-- Preview & Download Options -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="md:col-span-2">
+                        <!-- Resume Preview Area -->
+                        <div class="bg-white p-2 rounded-lg shadow-lg">
+                            <iframe id="resume-preview" class="w-full h-[600px] border-0"></iframe>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <!-- Download Options -->
+                        <div class="bg-gray-800 p-6 rounded-lg">
+                            <h3 class="text-xl font-medium text-blue-400 mb-4">Download Options</h3>
+                            
+                            <div class="space-y-4">
+                                <button onclick="downloadResumeAsPDF()" class="w-full px-4 py-3 bg-blue-700 hover:bg-blue-600 rounded-lg text-white flex items-center justify-center">
+                                    <i class="fas fa-file-pdf mr-2"></i>Download PDF
+                                </button>
+                                
+                                <button onclick="downloadResumeAsWord()" class="w-full px-4 py-3 bg-green-700 hover:bg-green-600 rounded-lg text-white flex items-center justify-center">
+                                    <i class="fas fa-file-word mr-2"></i>Download DOCX
+                                </button>
+                                
+                                <button onclick="copyResumeAsText()" class="w-full px-4 py-3 bg-gray-700 hover:bg-gray-600 rounded-lg text-white flex items-center justify-center">
+                                    <i class="fas fa-copy mr-2"></i>Copy Text
+                                </button>
+                            </div>
+                            
+                            <div class="mt-8">
+                                <h4 class="font-medium text-gray-300 mb-2">Save to Account</h4>
+                                <button onclick="saveResume()" class="w-full px-4 py-3 bg-purple-700 hover:bg-purple-600 rounded-lg text-white flex items-center justify-center">
+                                    <i class="fas fa-save mr-2"></i>Save Resume
+                                </button>
+                                <p class="text-xs text-gray-500 mt-2">Save your resume to access it later or make updates</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Actions -->
+                        <div class="mt-6">
+                            <button onclick="createNewResume()" class="w-full px-4 py-3 bg-gray-700 hover:bg-gray-600 rounded-lg text-white flex items-center justify-center">
+                                <i class="fas fa-plus mr-2"></i>Create New Resume
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+    
+            <!-- Error Modal (Hidden by default) -->
+            <div id="errorModal" class="hidden fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 z-50">
+                <div class="dark-card p-6 max-w-md">
+                    <h3 class="text-xl font-semibold text-red-500 mb-4">Error</h3>
+                    <p id="errorMessage" class="text-gray-300 mb-4"></p>
+                    <div class="text-right">
+                        <button id="closeErrorBtn" class="bg-gray-700 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-md transition-colors">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    
+        <!-- Chatbot Button and Popup -->
+        <div class="chatbot-button" id="chatbot-button">
+            <i class="fas fa-robot"></i>
+        </div>
+    
+        <!-- Chatbot Popup -->
+        <div class="chatbot-popup" id="chatbot-popup">
+            <div class="chatbot-header">
+                <div class="chatbot-title">
+                    <span>AI Resume Assistant</span>
+                    <div class="speaking-animation" id="speaking-indicator" style="display: none;">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+                <div class="chatbot-close" id="chatbot-close">&times;</div>
+            </div>
+            
+            <div class="chatbot-body">
+                <div class="robot-container">
+                    <!-- Loading indicator for the 3D model -->
+                    <div class="model-loading" id="model-loading">
+                        <div class="spinner"></div>
+                    </div>
+                    
+                    <!-- Canvas for 3D robot model -->
+                    <canvas id="robot-canvas"></canvas>
+                    
+                    <!-- Audio controls -->
+                    <div class="audio-controls">
+                        <button class="audio-button" id="speak-btn" title="Speak">
+                            <i class="fas fa-volume-up"></i>
+                        </button>
+                        <button class="audio-button" id="mute-btn" title="Mute" style="display: none;">
+                            <i class="fas fa-volume-mute"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="chat-messages" id="chat-messages">
+                    <div class="message assistant-message">
+                        <p id="assistant-text">Welcome to the Resume Builder! I can help you create a professional resume. Ask me for tips on resume writing or how to showcase your skills effectively.</p>
+                    </div>
+                    <!-- Messages will be added here dynamically -->
+                </div>
+                
+                <div class="chat-input">
+                    <input type="text" id="user-input" placeholder="Type your message..." />
+                    <button id="send-button">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    
+        <style>
+            .dark-card {
+                background-color: #1a1a1a;
+                border-radius: 20px;
+            }
+            
+            .gradient-button {
+                display: flex;
+                align-items: center;
+                background: linear-gradient(90deg, #6c63ff 0%, #5f5cc5 100%);
+                color: white;
+                font-size: medium;
+                border-radius: 30px;
+                transition: all 0.3s;
+                padding: 12px 24px;
+            }
+            
+            .gradient-button:hover {
+                opacity: 0.9;
+                transform: translateY(-2px);
+            }
+            
+            .gradient-button:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+                transform: none;
+            }
+            
+            .button-with-arrow {
+                display: flex;
+                align-items: center;
+                background-color: rgba(0, 0, 0, 0.4);
+                padding: 10px 20px;
+                border-radius: 30px;
+                transition: all 0.3s;
+                color: white;
+            }
+            
+            .button-with-arrow:hover {
+                background-color: rgba(0, 0, 0, 0.6);
+            }
+            
+            .arrow-icon {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 30px;
+                height: 30px;
+                background-color: #7CFC00;
+                border-radius: 50%;
+                margin-left: 10px;
+            }
+            
+            .menu-button {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 50px;
+                height: 50px;
+                border-radius: 50%;
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                cursor: pointer;
+                transition: all 0.3s;
+            }
+            
+            .menu-button:hover {
+                background-color: rgba(255, 255, 255, 0.1);
+            }
+            
+            .progress-step {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                flex: 1;
+                position: relative;
+            }
+            
+            .progress-step:not(:last-child):after {
+                content: '';
+                position: absolute;
+                top: 15px;
+                right: calc(-50% + 20px);
+                width: calc(100% - 40px);
+                height: 2px;
+                background-color: #6c63ff;
+            }
+            
+            .step-circle {
+                width: 30px;
+                height: 30px;
+                border-radius: 50%;
+                background-color: #333;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin-bottom: 8px;
+                position: relative;
+                z-index: 10;
+            }
+            
+            .step-circle.active {
+                background-color: #6c63ff;
+            }
+            
+            .step-circle.completed {
+                background-color: #7CFC00;
+            }
+            
+            .step-label {
+                text-align: center;
+                font-size: 0.875rem;
+                color: rgba(255, 255, 255, 0.6);
+            }
+            
+            .step-label.active {
+                color: white;
+                font-weight: 500;
+            }
+            
+            .skill-tag {
+                padding: 6px 12px;
+                background-color: rgba(108, 99, 255, 0.2);
+                border-radius: 16px;
+                display: inline-flex;
+                align-items: center;
+                margin-right: 8px;
+                margin-bottom: 8px;
+            }
+            
+            .skill-tag-text {
+                margin-right: 8px;
+            }
+            
+            .skill-tag-remove {
+                cursor: pointer;
+                color: #ff6b6b;
+            }
+            
+            .skill-tag-remove:hover {
+                color: #ff4757;
+            }
+        </style>
+    
+        <!-- Load API service first -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.37.12/docxtemplater.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/PizZip/3.0.6/pizzip.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    
+        <script src="gemini-api.js"></script>
+        <script src="resume_builder.js"></script>
+        <script src="chatbot.js"></script>
+    </body>
+    </html>

@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mentoring Session | DishaMarg</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Three.js Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    
+    <style>
+        body {
+            background-color: #000;
+            color: white;
+            margin: 0;
+            overflow: hidden;
+        }
+        
+        .mentor-chat-container {
+            height: calc(100vh - 4rem);
+            display: flex;
+        }
+        
+        .message-scroll {
+            scrollbar-width: thin;
+            scrollbar-color: #6c63ff rgba(255,255,255,0.1);
+            overflow-y: auto;
+            max-height: calc(100vh - 12rem); /* Adjust based on header and input height */
+        }
+        
+        .message-scroll::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .message-scroll::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.1);
+        }
+        
+        .message-scroll::-webkit-scrollbar-thumb {
+            background-color: #6c63ff;
+            border-radius: 20px;
+        }
+
+        .button-with-arrow {
+            display: flex;
+            align-items: center;
+            background-color: rgba(0, 0, 0, 0.4);
+            padding: 10px 20px;
+            border-radius: 30px;
+            transition: all 0.3s;
+            color: white;
+        }
+        
+        .button-with-arrow:hover {
+            background-color: rgba(0, 0, 0, 0.6);
+        }
+        
+        .arrow-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+            background-color: #7CFC00;
+            border-radius: 50%;
+            margin-left: 10px;
+        }
+
+        .speaking-animation {
+            display: flex;
+            gap: 4px;
+        }
+
+        .speaking-animation span {
+            width: 8px;
+            height: 8px;
+            background-color: #6c63ff;
+            border-radius: 50%;
+            animation: bounce 0.6s infinite;
+        }
+
+        .speaking-animation span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .speaking-animation span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-5px);
+            }
+        }
+
+        .speech-controls button {
+            margin-left: 8px;
+            padding: 6px 12px;
+            background-color: #6c63ff;
+            border-radius: 4px;
+        }
+        
+        .speech-controls button:hover {
+            background-color: #7c73ff;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header Navigation -->
+    <header class="flex justify-between items-center py-4 px-6 md:px-16 border-b border-gray-800">
+        <div class="logo flex items-center">
+            <span class="text-3xl font-bold">
+                <span class="text-blue-500">Disha</span>Marg
+            </span>
+        </div>
+        
+        <div class="flex items-center space-x-4">
+            <button onclick="window.location.href='HomePage.html'" class="button-with-arrow">
+                Back to Home
+                <span class="arrow-icon">
+                    <i class="fas fa-arrow-left text-sm text-black"></i>
+                </span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Mentoring Session Container -->
+    <div class="mentor-chat-container">
+        <!-- Left Half: 3D Tutor Model -->
+        <div class="w-1/2 bg-black flex items-center justify-center relative">
+            <canvas id="tutor-canvas" class="w-full h-full"></canvas>
+            <div id="model-loading" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                <div class="spinner w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+        </div>
+
+        <!-- Right Half: Chat Interface -->
+        <div class="w-1/2 bg-gray-900 flex flex-col">
+            <div class="p-4 bg-gray-800 text-white flex justify-between items-center">
+                <h2 class="text-xl font-bold">AI Career Mentor</h2>
+                <div class="speaking-animation" id="speaking-indicator" style="display: none;">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+
+            <!-- Chat Messages -->
+            <div id="chat-messages" class="flex-1 p-6 overflow-y-auto message-scroll">
+                <div class="message assistant-message bg-blue-900 bg-opacity-30 p-3 rounded-lg mb-4 max-w-[80%]">
+                    <p>Hello! I'm your AI Career Mentor. I can help you with career guidance, skill development, and professional growth. What would you like to discuss today?</p>
+                </div>
+            </div>
+
+            <!-- Chat Input and Speech Controls -->
+            <div class="p-4 bg-gray-800 flex flex-col">
+                <div class="flex items-center mb-2">
+                    <input 
+                        type="text" 
+                        id="user-input" 
+                        placeholder="Ask a career-related question..." 
+                        class="flex-1 bg-gray-700 text-white p-3 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                    <button 
+                        id="send-button" 
+                        class="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-r-lg"
+                    >
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+                <div class="speech-controls flex justify-end">
+                    <button id="pause-speech" class="text-white"><i class="fas fa-pause"></i> Pause</button>
+                    <button id="resume-speech" class="text-white"><i class="fas fa-play"></i> Resume</button>
+                    <button id="stop-speech" class="text-white"><i class="fas fa-stop"></i> Stop</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // 3D Tutor Model Initialization
+            let scene, camera, renderer, tutor, mixer, clock, idleAction, raiseHandAction, controls;
+            const canvas = document.getElementById('tutor-canvas');
+            const modelLoading = document.getElementById('model-loading');
+        
+            function initTutorModel() {
+                // Scene setup
+                scene = new THREE.Scene();
+                scene.background = null;
+        
+                // Camera
+                camera = new THREE.PerspectiveCamera(45, canvas.clientWidth / canvas.clientHeight, 0.1, 1000);
+                camera.position.set(0, 1, 5); // Position camera slightly above and in front
+        
+                // Renderer
+                renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+                renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+                renderer.setPixelRatio(window.devicePixelRatio);
+        
+                // Lights
+                const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+                scene.add(ambientLight);
+                const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+                directionalLight.position.set(0, 1, 1);
+                scene.add(directionalLight);
+        
+                // OrbitControls
+                controls = new THREE.OrbitControls(camera, canvas);
+                controls.enableDamping = true;
+                controls.dampingFactor = 0.05;
+                controls.enableZoom = false;
+        
+                // Clock for animation timing
+                clock = new THREE.Clock();
+        
+                // Load tutor model
+                const loader = new THREE.GLTFLoader();
+                loader.load(
+                    './robo.glb', // Ensure the path is correct
+                    (gltf) => {
+                        tutor = gltf.scene;
+                        
+                        // Center and scale model
+                        const box = new THREE.Box3().setFromObject(tutor);
+                        const center = box.getCenter(new THREE.Vector3());
+                        const size = box.getSize(new THREE.Vector3());
+                        
+                        // Center horizontally and adjust vertically
+                        tutor.position.set(0, -size.y / 2, 0); // Shift down to center vertically
+                        const maxDim = Math.max(size.x, size.y, size.z);
+                        const scale = 2 / maxDim;
+                        tutor.scale.set(scale, scale, scale);
+                        
+                        // Ensure tutor faces forward
+                        tutor.rotation.set(0, 0, 0); // Face front by default
+        
+                        // Handle animations if present
+                        if (gltf.animations && gltf.animations.length) {
+                            mixer = new THREE.AnimationMixer(tutor);
+                            
+                            // Find and set up idle and raise hand animations
+                            const animations = gltf.animations;
+                            idleAction = mixer.clipAction(animations.find(anim => anim.name === 'Idle') || animations[0]);
+                            raiseHandAction = mixer.clipAction(animations.find(anim => anim.name === 'RaiseHand') || animations[1]);
+        
+                            // Configure animations
+                            idleAction.setLoop(THREE.LoopRepeat); // Loop idle animation
+                            idleAction.play(); // Start with idle animation
+                            raiseHandAction.setLoop(THREE.LoopOnce); // Play raise hand once
+                            raiseHandAction.clampWhenFinished = true; // Stop at the last frame
+                        }
+                        
+                        scene.add(tutor);
+                        modelLoading.style.display = 'none';
+                        animate();
+                    },
+                    (xhr) => {
+                        // Progress callback
+                        console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+                    },
+                    (error) => {
+                        console.error('Error loading tutor model:', error);
+                        modelLoading.innerHTML = '<p class="text-red-500">Model loading failed. Please check the file path or network connection.</p>';
+                    }
+                );
+            }
+        
+            function triggerTutorAnimation() {
+                if (!tutor || !mixer) return;
+        
+                // Transition from idle to raise hand
+                idleAction.fadeOut(0.5); // Fade out idle
+                raiseHandAction.reset().fadeIn(0.5).play(); // Play raise hand
+        
+                // Transition back to idle after raise hand finishes
+                raiseHandAction.getMixer().addEventListener('finished', () => {
+                    raiseHandAction.fadeOut(0.5);
+                    idleAction.reset().fadeIn(0.5).play();
+                });
+            }
+        
+            function animate() {
+                requestAnimationFrame(animate);
+                if (mixer) mixer.update(clock.getDelta());
+                controls.update();
+                renderer.render(scene, camera);
+            }
+        
+            // Speech Synthesis with Controls
+            const synth = window.speechSynthesis;
+            const speakingIndicator = document.getElementById('speaking-indicator');
+            let currentUtterance = null;
+        
+            function speak(text) {
+                if (!synth) {
+                    console.warn('Speech Synthesis not supported');
+                    return;
+                }
+        
+                // Cancel any ongoing speech
+                if (synth.speaking) synth.cancel();
+        
+                currentUtterance = new SpeechSynthesisUtterance(text);
+                currentUtterance.onstart = () => {
+                    speakingIndicator.style.display = 'inline-flex';
+                    triggerTutorAnimation();
+                };
+                currentUtterance.onend = () => {
+                    speakingIndicator.style.display = 'none';
+                    currentUtterance = null;
+                };
+                synth.speak(currentUtterance);
+            }
+        
+            document.getElementById('pause-speech').addEventListener('click', () => {
+                if (synth.speaking && !synth.paused) synth.pause();
+            });
+        
+            document.getElementById('resume-speech').addEventListener('click', () => {
+                if (synth.paused) synth.resume();
+            });
+        
+            document.getElementById('stop-speech').addEventListener('click', () => {
+                if (synth.speaking) {
+                    synth.cancel();
+                    speakingIndicator.style.display = 'none';
+                    currentUtterance = null;
+                }
+            });
+        
+            // Chat Functionality
+            const chatMessages = document.getElementById('chat-messages');
+            const userInput = document.getElementById('user-input');
+            const sendButton = document.getElementById('send-button');
+        
+            function addMessage(text, type = 'user') {
+                console.log(`Adding message: Type=${type}, Text=${text}`); // Debug log
+        
+                const messageDiv = document.createElement('div');
+                messageDiv.classList.add('message', `${type}-message`, 'mb-4', 'p-3', 'rounded-lg', 'max-w-[80%]');
+                
+                if (type === 'user') {
+                    messageDiv.classList.add('ml-auto', 'bg-green-900', 'bg-opacity-30');
+                    messageDiv.innerHTML = `<p class="text-gray-300">${text}</p>`;
+                } else {
+                    messageDiv.classList.add('bg-blue-900', 'bg-opacity-30');
+                    // Structure the assistant response into sections
+                    const sections = {
+                        choosePath: text.match(/Choose a Path and Specialize:.*?(?=Learn the Fundamentals:)/is)?.[0] || '',
+                        fundamentals: text.match(/Learn the Fundamentals:.*?(?=Explore Educational Resources:)/is)?.[0] || '',
+                        resources: text.match(/Explore Educational Resources:.*?(?=Practice Consistently:)/is)?.[0] || '',
+                        practice: text.match(/Practice Consistently:.*?(?=Build a Portfolio:)/is)?.[0] || '',
+                        portfolio: text.match(/Build a Portfolio:.*?(?=Network and Connect:)/is)?.[0] || '',
+                        network: text.match(/Network and Connect:.*?(?=Prepare for Job Applications:)/is)?.[0] || '',
+                        jobApplications: text.match(/Prepare for Job Applications:.*?(?=Key Takeaways:)/is)?.[0] || '',
+                        takeaways: text.match(/Key Takeaways:.*?(?=Final Note:)/is)?.[0] || '',
+                        finalNote: text.match(/Final Note:.*$/is)?.[0] || '',
+                        intro: text.match(/Hello! I'm your AI Career Mentor\..*?today\?/i)?.[0] || ''
+                    };
+        
+                    // Clean up the sections by removing the "* *" markers
+                    for (let key in sections) {
+                        sections[key] = sections[key].replace(/\* \*/g, '').trim();
+                    }
+        
+                    // Log the sections for debugging
+                    console.log('Parsed sections:', sections);
+        
+                    // If it's the intro message, display it as is
+                    if (sections.intro) {
+                        messageDiv.innerHTML = `<p class="text-gray-400">${sections.intro}</p>`;
+                    } else {
+                        // Check if any sections were found
+                        const hasSections = Object.values(sections).some(section => section && !section.includes("Hello! I'm your AI Career Mentor"));
+                        if (hasSections) {
+                            // Structure the response into sections
+                            messageDiv.innerHTML = `
+                                ${sections.choosePath ? `
+                                    <h3 class="text-lg font-medium mb-3">1. Choose a Path and Specialize</h3>
+                                    <p class="text-gray-400 mb-3">${sections.choosePath.replace('Choose a Path and Specialize:', '')}</p>
+                                ` : ''}
+        
+                                ${sections.fundamentals ? `
+                                    <h3 class="text-lg font-medium mb-3">2. Learn the Fundamentals</h3>
+                                    <p class="text-gray-400 mb-3">${sections.fundamentals.replace('Learn the Fundamentals:', '')}</p>
+                                ` : ''}
+        
+                                ${sections.resources ? `
+                                    <h3 class="text-lg font-medium mb-3">3. Explore Educational Resources</h3>
+                                    <p class="text-gray-400 mb-3">${sections.resources.replace('Explore Educational Resources:', '')}</p>
+                                ` : ''}
+        
+                                ${sections.practice ? `
+                                    <h3 class="text-lg font-medium mb-3">4. Practice Consistently</h3>
+                                    <p class="text-gray-400 mb-3">${sections.practice.replace('Practice Consistently:', '')}</p>
+                                ` : ''}
+        
+                                ${sections.portfolio ? `
+                                    <h3 class="text-lg font-medium mb-3">5. Build a Strong Portfolio</h3>
+                                    <p class="text-gray-400 mb-3">${sections.portfolio.replace('Build a Portfolio:', '')}</p>
+                                ` : ''}
+        
+                                ${sections.network ? `
+                                    <h3 class="text-lg font-medium mb-3">6. Network and Connect</h3>
+                                    <p class="text-gray-400 mb-3">${sections.network.replace('Network and Connect:', '')}</p>
+                                ` : ''}
+        
+                                ${sections.jobApplications ? `
+                                    <h3 class="text-lg font-medium mb-3">7. Prepare for Job Applications</h3>
+                                    <p class="text-gray-400 mb-3">${sections.jobApplications.replace('Prepare for Job Applications:', '')}</p>
+                                ` : ''}
+        
+                                ${sections.takeaways ? `
+                                    <h3 class="text-lg font-medium mb-3">Key Takeaways</h3>
+                                    <p class="text-gray-400 mb-3">${sections.takeaways.replace('Key Takeaways:', '')}</p>
+                                ` : ''}
+        
+                                ${sections.finalNote ? `
+                                    <h3 class="text-lg font-medium mb-3">Final Note</h3>
+                                    <p class="text-gray-400 mb-3">${sections.finalNote.replace('Final Note:', '')}</p>
+                                ` : ''}
+                            `;
+                        } else {
+                            // Fallback: Display the raw response if no sections are found
+                            console.warn('No sections found, displaying raw response');
+                            messageDiv.innerHTML = `<p class="text-gray-400">${text}</p>`;
+                        }
+                    }
+                }
+                
+                chatMessages.appendChild(messageDiv);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+        
+            async function getChatResponse(query) {
+                const apiKey = localStorage.getItem('geminiApiKey');
+                
+                if (!apiKey) {
+                    alert('Please set your Gemini API key in the Home page settings.');
+                    window.location.href = 'HomePage.html#settings';
+                    return;
+                }
+        
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${apiKey}`;
+                
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contents: [{ parts: [{ text: query }] }],
+                            generationConfig: { temperature: 0.7 }
+                        })
+                    });
+        
+                    if (!response.ok) throw new Error('API request failed');
+        
+                    const data = await response.json();
+                    const tutorResponse = data.candidates[0].content.parts[0].text;
+                    
+                    console.log('Received tutor response:', tutorResponse); // Debug log
+                    
+                    addMessage(tutorResponse, 'assistant');
+                    speak(tutorResponse);
+                    
+                    return tutorResponse;
+                } catch (error) {
+                    console.error('API Error:', error);
+                    const fallbackMessage = "I apologize, but I couldn't process your request at the moment. Please try again later.";
+                    addMessage(fallbackMessage, 'assistant');
+                    speak(fallbackMessage);
+                }
+            }
+        
+            sendButton.addEventListener('click', sendMessage);
+            userInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') sendMessage();
+            });
+        
+            function sendMessage() {
+                const message = userInput.value.trim();
+                if (!message) return;
+        
+                addMessage(message, 'user');
+                userInput.value = '';
+                getChatResponse(message);
+            }
+        
+            // Resize handler
+            window.addEventListener('resize', () => {
+                if (camera && renderer && canvas) {
+                    camera.aspect = canvas.clientWidth / canvas.clientHeight;
+                    camera.updateProjectionMatrix();
+                    renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+                }
+            });
+        
+            // Initialize
+            initTutorModel();
+        });
+        </script>
+</body>
+</html>
