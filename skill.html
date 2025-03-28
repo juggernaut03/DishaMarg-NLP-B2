@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skill Gap Analyzer | DishaMarg</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Three.js and related libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <!-- Web Speech API polyfill -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-speech-browser-sdk/1.18.0/speech.browser.sdk.min.js"></script>
+    <!-- Custom Stylesheets -->
+    <link rel="stylesheet" href="chatbot-styles.css">
+</head>
+<body class="bg-black text-white min-h-screen font-['Inter','Segoe_UI',sans-serif]">
+    <!-- Header Navigation -->
+    <header class="flex justify-between items-center py-4 px-6 md:px-16 border-b border-gray-800">
+        <div class="logo flex items-center">
+            <span class="text-3xl font-bold">
+                <span class="text-blue-500">Disha</span>Marg
+            </span>
+        </div>
+        
+        <div class="flex items-center space-x-4">
+            <button class="button-with-arrow" onclick="window.location.href='HomePage.html'">
+                Back to Home
+                <span class="arrow-icon">
+                    <i class="fas fa-arrow-left text-sm text-black"></i>
+                </span>
+            </button>
+            
+            <button class="menu-button">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </header>
+
+    <div class="container mx-auto px-6 md:px-16 py-8">
+        <!-- Title Section -->
+        <section class="mb-8 text-center">
+            <h1 class="text-4xl font-bold text-blue-500 mb-2">Skill Gap Analyzer</h1>
+            <p class="text-gray-400 max-w-2xl mx-auto">Identify missing skills for your desired job and get personalized learning recommendations</p>
+        </section>
+
+        <!-- Input Form -->
+        <div class="dark-card p-6 mb-8 mx-auto max-w-3xl">
+            <div class="mb-6">
+                <label for="jobRole" class="block text-gray-300 font-medium mb-2">Desired Job Role</label>
+                <input type="text" id="jobRole" placeholder="e.g., Data Scientist, Web Developer" 
+                    class="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white">
+            </div>
+
+            <div class="mb-6">
+                <label for="resumeText" class="block text-gray-300 font-medium mb-2">Paste Your Resume Text</label>
+                <textarea id="resumeText" rows="8" placeholder="Copy and paste your resume including academic profile details..." 
+                    class="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"></textarea>
+            </div>
+
+            <div class="text-center">
+                <button id="analyzeBtn" class="gradient-button">
+                    <i class="fas fa-search mr-2"></i>Analyze Skills
+                    <span class="arrow-icon">
+                        <i class="fas fa-arrow-right text-sm text-black"></i>
+                    </span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Loading Indicator (Hidden by default) -->
+        <div id="loadingIndicator" class="hidden flex flex-col items-center justify-center p-8">
+            <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-blue-600 border-solid mb-4"></div>
+            <p class="text-gray-300">Analyzing skills and generating recommendations...</p>
+        </div>
+
+        <!-- Results Section (Hidden by default) -->
+        <div id="resultsSection" class="hidden mx-auto max-w-5xl">
+            <!-- Skills Comparison -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <!-- Required Skills -->
+                <div class="dark-card p-6">
+                    <h2 class="text-xl font-semibold text-blue-500 mb-4">Required Skills</h2>
+                    <ul id="requiredSkillsList" class="list-disc pl-5 space-y-2 text-gray-300"></ul>
+                </div>
+                
+                <!-- Current Skills -->
+                <div class="dark-card p-6">
+                    <h2 class="text-xl font-semibold text-green-500 mb-4">Your Current Skills</h2>
+                    <ul id="currentSkillsList" class="list-disc pl-5 space-y-2 text-gray-300"></ul>
+                </div>
+                
+                <!-- Skill Gaps -->
+                <div class="dark-card p-6">
+                    <h2 class="text-xl font-semibold text-red-500 mb-4">Skill Gaps</h2>
+                    <ul id="skillGapsList" class="space-y-3"></ul>
+                </div>
+            </div>
+
+            <!-- Recommendations Section -->
+            <div class="dark-card p-6 mb-8">
+                <h2 class="text-2xl font-semibold text-blue-500 mb-6">Learning Recommendations</h2>
+                <div id="recommendationsContainer">
+                    <!-- Recommendations will be added here by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex flex-wrap justify-center gap-4 mb-8">
+                <button id="saveResultsBtn" class="action-button bg-green-700 hover:bg-green-600">
+                    <i class="fas fa-save mr-2"></i>Save Results
+                </button>
+                <button id="downloadBtn" class="action-button bg-purple-700 hover:bg-purple-600">
+                    <i class="fas fa-download mr-2"></i>Download
+                </button>
+                <button id="newAnalysisBtn" class="action-button bg-gray-700 hover:bg-gray-600">
+                    <i class="fas fa-redo mr-2"></i>New Analysis
+                </button>
+            </div>
+        </div>
+
+        <!-- Saved Results Section (Hidden by default) -->
+        <div id="savedResultsSection" class="hidden dark-card p-6 mb-8 mx-auto max-w-3xl">
+            <h2 class="text-2xl font-semibold text-blue-500 mb-4">Saved Analyses</h2>
+            <div id="savedResultsList" class="space-y-4">
+                <!-- Saved results will be added here by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Error Modal (Hidden by default) -->
+        <div id="errorModal" class="hidden fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 z-50">
+            <div class="dark-card p-6 max-w-md">
+                <h3 class="text-xl font-semibold text-red-500 mb-4">Error</h3>
+                <p id="errorMessage" class="text-gray-300 mb-4"></p>
+                <div class="text-right">
+                    <button id="closeErrorBtn" class="bg-gray-700 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-md transition-colors">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chatbot Button and Popup -->
+    <div class="chatbot-button" id="chatbot-button">
+        <i class="fas fa-robot"></i>
+    </div>
+
+    <!-- Chatbot Popup -->
+    <div class="chatbot-popup" id="chatbot-popup">
+        <div class="chatbot-header">
+            <div class="chatbot-title">
+                <span>AI Assistant</span>
+                <div class="speaking-animation" id="speaking-indicator" style="display: none;">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+            <div class="chatbot-close" id="chatbot-close">&times;</div>
+        </div>
+        
+        <div class="chatbot-body">
+            <div class="robot-container">
+                <!-- Loading indicator for the 3D model -->
+                <div class="model-loading" id="model-loading">
+                    <div class="spinner"></div>
+                </div>
+                
+                <!-- Canvas for 3D robot model -->
+                <canvas id="robot-canvas"></canvas>
+                
+                <!-- Audio controls -->
+                <div class="audio-controls">
+                    <button class="audio-button" id="speak-btn" title="Speak">
+                        <i class="fas fa-volume-up"></i>
+                    </button>
+                    <button class="audio-button" id="mute-btn" title="Mute" style="display: none;">
+                        <i class="fas fa-volume-mute"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="chat-messages" id="chat-messages">
+                <div class="message assistant-message">
+                    <p id="assistant-text">Welcome to the Skill Gap Analyzer! I can help you identify missing skills for your desired job role and suggest personalized learning paths.</p>
+                </div>
+                <!-- Messages will be added here dynamically -->
+            </div>
+            
+            <div class="chat-input">
+                <input type="text" id="user-input" placeholder="Type your message..." />
+                <button id="send-button">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .dark-card {
+            background-color: #1a1a1a;
+            border-radius: 20px;
+        }
+        
+        .gradient-button {
+            display: flex;
+            align-items: center;
+            background: linear-gradient(90deg, #6c63ff 0%, #5f5cc5 100%);
+            color: white;
+            font-size: medium;
+            border-radius: 30px;
+            transition: all 0.3s;
+            padding: 12px 24px;
+        }
+        
+        .gradient-button:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+        
+        .action-button {
+            display: flex;
+            align-items: center;
+            color: white;
+            font-size: true;
+            padding: 10px 20px;
+            border-radius: 12px;
+            transition: all 0.3s;
+        }
+        
+        .action-button:hover {
+            transform: translateY(-2px);
+        }
+        
+        .arrow-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+            background-color: #7CFC00;
+            border-radius: 50%;
+            margin-left: 10px;
+        }
+        
+        .button-with-arrow {
+            display: flex;
+            align-items: center;
+            background-color: rgba(0, 0, 0, 0.4);
+            padding: 10px 20px;
+            border-radius: 30px;
+            transition: all 0.3s;
+            color: white;
+        }
+        
+        .button-with-arrow:hover {
+            background-color: rgba(0, 0, 0, 0.6);
+        }
+        
+        .menu-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .menu-button:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+    </style>
+
+    <!-- Load API service first -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <script src="gemini-api.js"></script>
+    <!-- Then load main app and chatbot -->
+    <script src="app.js"></script>
+    <script src="chatbot.js"></script>
+    
+    <script>
+        // Initialize with the API key from localStorage if available
+      
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM fully loaded and parsed');
+    
+    // First check if API key exists
+    const savedApiKey = localStorage.getItem('geminiApiKey');
+    
+    // Initialize API with saved key if available
+    if (savedApiKey && window.geminiApi) {
+        console.log('Initializing API with saved key');
+        window.geminiApi.initialize(savedApiKey);
+    } else if (!savedApiKey) {
+        console.log('No API key found');
+        // Show error only if trying to analyze without key
+        const errorModal = document.getElementById('errorModal');
+        const errorMessage = document.getElementById('errorMessage');
+        
+        if (errorModal && errorMessage) {
+            errorMessage.textContent = 'Please set your Gemini API key in the Home page settings first.';
+            errorModal.classList.remove('hidden');
+            
+            // Add click event for closing error modal
+            const closeErrorBtn = document.getElementById('closeErrorBtn');
+            if (closeErrorBtn) {
+                closeErrorBtn.addEventListener('click', function() {
+                    errorModal.classList.add('hidden');
+                });
+            }
+        }
+    }
+    
+    // Make sure the analyze button has a direct event listener
+    const analyzeBtn = document.getElementById('analyzeBtn');
+    if (analyzeBtn) {
+        console.log('Adding click event to analyze button');
+        
+        // Remove any existing listeners to prevent duplicates
+        const newAnalyzeBtn = analyzeBtn.cloneNode(true);
+        if (analyzeBtn.parentNode) {
+            analyzeBtn.parentNode.replaceChild(newAnalyzeBtn, analyzeBtn);
+        }
+        
+        // Add the event listener to the new button
+        newAnalyzeBtn.addEventListener('click', function(e) {
+            console.log('Analyze button clicked');
+            e.preventDefault(); // Prevent default form submission
+            
+            // If global startAnalysis exists, use it
+            if (typeof window.startAnalysis === 'function') {
+                window.startAnalysis();
+            } else {
+                // Show error if function not found
+                console.error('startAnalysis function not available');
+                if (window.showError) {
+                    window.showError('Analysis function not available. Please refresh the page.');
+                } else {
+                    alert('Analysis function not available. Please refresh the page.');
+                }
+            }
+        });
+    } else {
+        console.error('Could not find analyze button');
+    }
+});
+    </script>
+    <script src="analysis-fix.js"></script>
+
+</body>
+</html>
