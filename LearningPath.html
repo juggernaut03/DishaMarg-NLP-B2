@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learning Path Generator | DishaMarg</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Three.js and related libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <!-- jsPDF library for PDF generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- docx generation library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/docx/7.8.2/docx.js"></script>
+    <!-- Web Speech API polyfill -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-speech-browser-sdk/1.18.0/speech.browser.sdk.min.js"></script>
+    <!-- Custom Stylesheets -->
+    <link rel="stylesheet" href="chatbot-styles.css">
+    <style>
+        body {
+            background-color: #000;
+            color: white;
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+        }
+        
+        .dark-card {
+            background-color: #1a1a1a;
+            border-radius: 20px;
+        }
+        
+        .gradient-card {
+            background: linear-gradient(90deg, #6c63ff 0%, #5f5cc5 100%);
+            border-radius: 20px;
+        }
+        
+        .gradient-button {
+            background: linear-gradient(90deg, #6c63ff 0%, #5f5cc5 100%);
+            padding: 10px 20px;
+            border-radius: 30px;
+            color: white;
+            display: inline-flex;
+            align-items: center;
+            transition: all 0.3s;
+        }
+        
+        .gradient-button:hover {
+            background: linear-gradient(90deg, #7c73ff 0%, #6f6cd5 100%);
+        }
+        
+        .button-with-arrow {
+            display: flex;
+            align-items: center;
+            background-color: rgba(0, 0, 0, 0.4);
+            padding: 10px 20px;
+            border-radius: 30px;
+            transition: all 0.3s;
+            color: white;
+        }
+        
+        .button-with-arrow:hover {
+            background-color: rgba(0, 0, 0, 0.6);
+        }
+        
+        .arrow-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+            background-color: #7CFC00;
+            border-radius: 50%;
+            margin-left: 10px;
+        }
+        
+        .menu-button, .settings-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .menu-button:hover, .settings-button:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .skill-tag {
+            padding: 4px 10px;
+            margin: 4px;
+            border-radius: 12px;
+            background-color: rgba(108, 99, 255, 0.2);
+            display: inline-block;
+            font-size: 0.875rem;
+        }
+        
+        .skill-tag.selected {
+            background-color: #6c63ff;
+            color: white;
+        }
+        
+        .radio-selector {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .radio-option {
+            padding: 8px 16px;
+            border-radius: 20px;
+            background-color: rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .radio-option.selected {
+            background-color: #6c63ff;
+        }
+        
+        .progress-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+            position: relative;
+        }
+        
+        .progress-step:not(:last-child):after {
+            content: '';
+            position: absolute;
+            top: 15px;
+            right: calc(-50% + 20px);
+            width: calc(100% - 40px);
+            height: 2px;
+            background-color: #6c63ff;
+        }
+        
+        .step-circle {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 8px;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .step-circle.active {
+            background-color: #6c63ff;
+        }
+        
+        .step-circle.completed {
+            background-color: #7CFC00;
+        }
+        
+        .step-label {
+            text-align: center;
+            font-size: 0.875rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+        
+        .step-label.active {
+            color: white;
+            font-weight: 500;
+        }
+        
+        .timeline-item {
+            display: flex;
+            position: relative;
+            margin-bottom: 40px;
+        }
+        
+        .timeline-marker {
+            flex: 0 0 60px;
+            position: relative;
+        }
+        
+        .timeline-marker::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 29px;
+            width: 2px;
+            height: 100%;
+            background-color: #6c63ff;
+        }
+        
+        .timeline-marker::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 20px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: #6c63ff;
+            z-index: 10;
+        }
+        
+        .timeline-item:last-child .timeline-marker::before {
+            height: 20px;
+        }
+        
+        .timeline-content {
+            flex: 1;
+            padding: 0 20px;
+        }
+        
+        .timeline-period {
+            display: inline-block;
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            background-color: rgba(108, 99, 255, 0.2);
+            border-radius: 10px;
+            margin-bottom: 8px;
+        }
+        
+        .timeline-timeframe {
+            display: inline-block;
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            background-color: rgba(0, 200, 83, 0.2);
+            color: #00c853;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            margin-left: 8px;
+        }
+        
+        .project-card {
+            background-color: rgba(30, 30, 30, 0.6);
+            border-left: 3px solid #00c853;
+            border-radius: 6px;
+            padding: 12px;
+            margin-top: 16px;
+            margin-bottom: 16px;
+        }
+        
+        .code-structure {
+            background-color: rgba(30, 30, 30, 0.9);
+            border-left: 3px solid #ff9800;
+            border-radius: 6px;
+            padding: 12px;
+            margin-top: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            display: none;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #6c63ff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .resource-link {
+            display: flex;
+            align-items: center;
+            background-color: rgba(108, 99, 255, 0.1);
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            transition: all 0.2s;
+        }
+        
+        .resource-link:hover {
+            background-color: rgba(108, 99, 255, 0.2);
+        }
+        
+        .resource-icon {
+            margin-right: 10px;
+            color: #6c63ff;
+        }
+        
+        .accordion-btn {
+            width: 100%;
+            text-align: left;
+            padding: 12px;
+            background-color: rgba(50, 50, 50, 0.4);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            transition: all 0.3s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .accordion-btn:hover {
+            background-color: rgba(108, 99, 255, 0.2);
+        }
+        
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        
+        .accordion-content.active {
+            max-height: 1000px;
+        }
+        
+        .gemini-badge {
+            display: inline-block;
+            background-color: rgba(108, 99, 255, 0.2);
+            color: #a299ff;
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-left: 8px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header Navigation -->
+    <header class="flex justify-between items-center py-4 px-6 md:px-16 border-b border-gray-800">
+        <div class="logo flex items-center">
+            <span class="text-3xl font-bold">
+                <span class="text-blue-500">Disha</span>Marg
+            </span>
+        </div>
+        
+        <div class="flex items-center space-x-4">
+            <button class="button-with-arrow" onclick="window.location.href='HomePage.html'">
+                Back to Home
+                <span class="arrow-icon">
+                    <i class="fas fa-arrow-left text-sm text-black"></i>
+                </span>
+            </button>
+            <button class="menu-button">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-6 md:px-16 py-8">
+        <!-- Header Section -->
+        <section class="mb-8 text-center">
+            <h1 class="text-4xl font-bold text-blue-500 mb-2">Learning Path Generator</h1>
+            <p class="text-gray-400 max-w-2xl mx-auto">Create a personalized learning roadmap for any technology or skill with Gemini integration</p>
+        </section>
+
+        <!-- Progress Steps -->
+        <section class="mb-12">
+            <div class="flex justify-between max-w-3xl mx-auto">
+                <div class="progress-step">
+                    <div class="step-circle active" id="step1-circle">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <div class="step-label active">Select Skill</div>
+                </div>
+                <div class="progress-step">
+                    <div class="step-circle" id="step2-circle">2</div>
+                    <div class="step-label" id="step2-label">Set Parameters</div>
+                </div>
+                <div class="progress-step">
+                    <div class="step-circle" id="step3-circle">3</div>
+                    <div class="step-label" id="step3-label">View Roadmap</div>
+                </div>
+                <div class="progress-step">
+                    <div class="step-circle" id="step4-circle">4</div>
+                    <div class="step-label" id="step4-label">Download</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Step 1: Skill Selection -->
+        <section id="step1" class="dark-card p-6 mb-8 mx-auto max-w-4xl">
+            <h2 class="text-2xl font-semibold mb-6">Choose a Technology or Skill</h2>
+            
+            <!-- Skills Categories -->
+            <div class="mb-6">
+                <h3 class="text-lg font-medium text-gray-300 mb-3">Categories</h3>
+                <div class="flex flex-wrap gap-2">
+                    <div class="category-tag px-3 py-1 bg-blue-800 rounded-full text-sm cursor-pointer" data-category="web" onclick="filterSkills('web')">Web Development</div>
+                    <div class="category-tag px-3 py-1 bg-purple-800 rounded-full text-sm cursor-pointer" data-category="mobile" onclick="filterSkills('mobile')">Mobile Development</div>
+                    <div class="category-tag px-3 py-1 bg-green-800 rounded-full text-sm cursor-pointer" data-category="data" onclick="filterSkills('data')">Data Science & AI</div>
+                    <div class="category-tag px-3 py-1 bg-yellow-800 rounded-full text-sm cursor-pointer" data-category="backend" onclick="filterSkills('backend')">Backend Development</div>
+                    <div class="category-tag px-3 py-1 bg-red-800 rounded-full text-sm cursor-pointer" data-category="devops" onclick="filterSkills('devops')">DevOps & Cloud</div>
+                    <div class="category-tag px-3 py-1 bg-gray-700 rounded-full text-sm cursor-pointer" data-category="all" onclick="filterSkills('all')">Show All</div>
+                </div>
+            </div>
+            
+            <!-- Skills Grid -->
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 mb-6" id="skills-container">
+                <!-- Web Development Skills -->
+                <div class="skill-tag cursor-pointer" data-category="web" onclick="selectSkill(this)">HTML & CSS</div>
+                <div class="skill-tag cursor-pointer" data-category="web" onclick="selectSkill(this)">JavaScript</div>
+                <div class="skill-tag cursor-pointer" data-category="web" onclick="selectSkill(this)">React</div>
+                <div class="skill-tag cursor-pointer" data-category="web" onclick="selectSkill(this)">Vue.js</div>
+                <div class="skill-tag cursor-pointer" data-category="web" onclick="selectSkill(this)">Angular</div>
+                <div class="skill-tag cursor-pointer" data-category="web" onclick="selectSkill(this)">Svelte</div>
+                <div class="skill-tag cursor-pointer" data-category="web" onclick="selectSkill(this)">TypeScript</div>
+                <div class="skill-tag cursor-pointer" data-category="web" onclick="selectSkill(this)">Next.js</div>
+                
+                <!-- Mobile Development Skills -->
+                <div class="skill-tag cursor-pointer" data-category="mobile" onclick="selectSkill(this)">Flutter</div>
+                <div class="skill-tag cursor-pointer" data-category="mobile" onclick="selectSkill(this)">React Native</div>
+                <div class="skill-tag cursor-pointer" data-category="mobile" onclick="selectSkill(this)">Swift</div>
+                <div class="skill-tag cursor-pointer" data-category="mobile" onclick="selectSkill(this)">Kotlin</div>
+                <div class="skill-tag cursor-pointer" data-category="mobile" onclick="selectSkill(this)">Android Development</div>
+                <div class="skill-tag cursor-pointer" data-category="mobile" onclick="selectSkill(this)">iOS Development</div>
+                
+                <!-- Data Science Skills -->
+                <div class="skill-tag cursor-pointer" data-category="data" onclick="selectSkill(this)">Python</div>
+                <div class="skill-tag cursor-pointer" data-category="data" onclick="selectSkill(this)">Machine Learning</div>
+                <div class="skill-tag cursor-pointer" data-category="data" onclick="selectSkill(this)">Deep Learning</div>
+                <div class="skill-tag cursor-pointer" data-category="data" onclick="selectSkill(this)">Data Analysis</div>
+                <div class="skill-tag cursor-pointer" data-category="data" onclick="selectSkill(this)">TensorFlow</div>
+                <div class="skill-tag cursor-pointer" data-category="data" onclick="selectSkill(this)">PyTorch</div>
+                <div class="skill-tag cursor-pointer" data-category="data" onclick="selectSkill(this)">Computer Vision</div>
+                <div class="skill-tag cursor-pointer" data-category="data" onclick="selectSkill(this)">NLP</div>
+                
+                <!-- Backend Development Skills -->
+                <div class="skill-tag cursor-pointer" data-category="backend" onclick="selectSkill(this)">Node.js</div>
+                <div class="skill-tag cursor-pointer" data-category="backend" onclick="selectSkill(this)">Express.js</div>
+                <div class="skill-tag cursor-pointer" data-category="backend" onclick="selectSkill(this)">Django</div>
+                <div class="skill-tag cursor-pointer" data-category="backend" onclick="selectSkill(this)">Flask</div>
+                <div class="skill-tag cursor-pointer" data-category="backend" onclick="selectSkill(this)">Spring Boot</div>
+                <div class="skill-tag cursor-pointer" data-category="backend" onclick="selectSkill(this)">Ruby on Rails</div>
+                <div class="skill-tag cursor-pointer" data-category="backend" onclick="selectSkill(this)">PHP</div>
+                <div class="skill-tag cursor-pointer" data-category="backend" onclick="selectSkill(this)">GraphQL</div>
+                
+                <!-- DevOps Skills -->
+                <div class="skill-tag cursor-pointer" data-category="devops" onclick="selectSkill(this)">Docker</div>
+                <div class="skill-tag cursor-pointer" data-category="devops" onclick="selectSkill(this)">Kubernetes</div>
+                <div class="skill-tag cursor-pointer" data-category="devops" onclick="selectSkill(this)">AWS</div>
+                <div class="skill-tag cursor-pointer" data-category="devops" onclick #
+
+="selectSkill(this)">Azure</div>
+                <div class="skill-tag cursor-pointer" data-category="devops" onclick="selectSkill(this)">GCP</div>
+                <div class="skill-tag cursor-pointer" data-category="devops" onclick="selectSkill(this)">CI/CD</div>
+                <div class="skill-tag cursor-pointer" data-category="devops" onclick="selectSkill(this)">Terraform</div>
+                <div class="skill-tag cursor-pointer" data-category="devops" onclick="selectSkill(this)">Linux</div>
+                
+                <!-- Gemini Integration Skills -->
+                <div class="skill-tag cursor-pointer" data-category="web" onclick="selectSkill(this)">Gemini API Integration</div>
+                <div class="skill-tag cursor-pointer" data-category="data" onclick="selectSkill(this)">LLM Prompting</div>
+                <div class="skill-tag cursor-pointer" data-category="data" onclick="selectSkill(this)">AI Application Development</div>
+            </div>
+            
+            <!-- Custom Skill Input -->
+            <div class="mb-6">
+                <label for="custom-skill" class="block text-gray-300 font-medium mb-2">Enter Custom Skill</label>
+                <div class="flex">
+                    <input type="text" id="custom-skill" placeholder="e.g., Blockchain, Unity, etc." 
+                        class="flex-1 px-4 py-3 bg-gray-900 border border-gray-700 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white">
+                    <button onclick="addCustomSkill()" class="px-4 py-3 bg-blue-700 hover:bg-blue-600 rounded-r-lg text-white">
+                        Add
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Next Button -->
+            <div class="text-center mt-8">
+                <button onclick="goToStep2()" class="gradient-button disabled:opacity-50 disabled:cursor-not-allowed" id="step1-next" disabled>
+                    <span>Continue to Set Parameters</span>
+                    <i class="fas fa-arrow-right ml-2"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- Step 2: Learning Parameters -->
+        <section id="step2" class="dark-card p-6 mb-8 mx-auto max-w-4xl hidden">
+            <h2 class="text-2xl font-semibold mb-6">Set Learning Parameters</h2>
+            
+            <!-- Selected Skill -->
+            <div class="mb-6 p-4 bg-gradient-to-r from-blue-900 to-purple-900 rounded-lg">
+                <h3 class="text-lg font-medium mb-2">Selected Skill</h3>
+                <div class="flex items-center">
+                    <span id="selected-skill-display" class="text-xl font-semibold text-white"></span>
+                    <button onclick="goToStep1()" class="ml-4 text-sm underline text-gray-300 hover:text-white">
+                        Change
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Learning Focus (Removed Gemini-specific text) -->
+            <div class="mb-6">
+                <h3 class="text-lg font-medium mb-3">Learning Focus</h3>
+                <p class="text-gray-400 mb-3">Your roadmap will focus on the core concepts and practical applications of your selected skill.</p>
+            </div>
+            
+            <!-- Learning Duration -->
+            <div class="mb-6">
+                <h3 class="text-lg font-medium mb-3">Learning Duration</h3>
+                <div class="radio-selector">
+                    <div class="radio-option" data-value="1-month" onclick="selectDuration(this)">1 Month</div>
+                    <div class="radio-option" data-value="3-months" onclick="selectDuration(this)">3 Months</div>
+                    <div class="radio-option" data-value="6-months" onclick="selectDuration(this)">6 Months</div>
+                    <div class="radio-option" data-value="1-year" onclick="selectDuration(this)">1 Year</div>
+                </div>
+            </div>
+
+            <!-- Proficiency Level -->
+            <div class="mb-6">
+                <h3 class="text-lg font-medium mb-3">Proficiency Level</h3>
+                <div class="radio-selector">
+                    <div class="radio-option" data-value="basic" onclick="selectProficiency(this)">Basic</div>
+                    <div class="radio-option" data-value="intermediate" onclick="selectProficiency(this)">Intermediate</div>
+                    <div class="radio-option" data-value="advanced" onclick="selectProficiency(this)">Advanced</div>
+                    <div class="radio-option" data-value="expert" onclick="selectProficiency(this)">Expert</div>
+                </div>
+            </div>
+
+            <!-- Previous Experience -->
+            <div class="mb-6">
+                <h3 class="text-lg font-medium mb-3">Previous Experience</h3>
+                <div class="radio-selector">
+                    <div class="radio-option" data-value="none" onclick="selectExperience(this)">None</div>
+                    <div class="radio-option" data-value="some" onclick="selectExperience(this)">Some</div>
+                    <div class="radio-option" data-value="moderate" onclick="selectExperience(this)">Moderate</div>
+                    <div class="radio-option" data-value="extensive" onclick="selectExperience(this)">Extensive</div>
+                </div>
+            </div>
+
+            <!-- Weekly Commitment -->
+            <div class="mb-6">
+                <h3 class="text-lg font-medium mb-3">Weekly Commitment</h3>
+                <input type="range" id="hours-per-week" min="5" max="40" value="10" step="5" class="w-full">
+                <p class="text-gray-400 mt-2">Hours per week: <span id="hours-display">10</span></p>
+            </div>
+
+            <!-- Next Button -->
+            <div class="text-center">
+                <button onclick="generateRoadmap()" class="gradient-button disabled:opacity-50 disabled:cursor-not-allowed" id="step2-next" disabled>
+                    <span>Generate Roadmap</span>
+                    <i class="fas fa-arrow-right ml-2"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- Step 3: Learning Roadmap -->
+        <section id="step3" class="dark-card p-6 mb-8 mx-auto max-w-4xl hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-semibold">Your Learning Roadmap</h2>
+                <div>
+                    <span id="roadmap-skill" class="text-blue-500 font-medium"></span>
+                   
+                    <span id="roadmap-level" class="text-green-500"></span>
+                </div>
+            </div>
+            
+            <!-- Roadmap Summary -->
+            <div class="mb-8 p-4 bg-gradient-to-r from-gray-900 to-gray-800 rounded-lg">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="text-center">
+                        <h3 class="text-gray-400 text-sm">Duration</h3>
+                        <p id="summary-duration" class="text-xl font-semibold">6 Months</p>
+                    </div>
+                    <div class="text-center">
+                        <h3 class="text-gray-400 text-sm">Weekly Commitment</h3>
+                        <p id="summary-hours" class="text-xl font-semibold">10 Hours/Week</p>
+                    </div>
+                    <div class="text-center">
+                        <h3 class="text-gray-400 text-sm">Total Learning Time</h3>
+                        <p id="summary-total" class="text-xl font-semibold">240 Hours</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Roadmap Timeline -->
+            <div id="roadmap-timeline" class="mb-8">
+                <!-- Timeline items will be generated by JS -->
+            </div>
+            
+            <!-- Download and Navigation Buttons -->
+            <div class="flex justify-between mt-8">
+                <button onclick="goToStep2()" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg">
+                    <i class="fas fa-arrow-left mr-2"></i> Back
+                </button>
+                <button onclick="goToStep4()" class="gradient-button">
+                    <span>Download Options</span>
+                    <i class="fas fa-arrow-right ml-2"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- Step 4: Download Options -->
+        <section id="step4" class="dark-card p-6 mb-8 mx-auto max-w-4xl hidden">
+            <h2 class="text-2xl font-semibold mb-6">Download Your Roadmap</h2>
+            <div class="flex justify-center gap-4">
+                <button onclick="downloadPDF()" class="gradient-button">
+                    <span>Download as PDF</span>
+                    <i class="fas fa-file-pdf ml-2"></i>
+                </button>
+                <button onclick="startNewRoadmap()" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg">
+                    <i class="fas fa-redo mr-2"></i> Start New Roadmap
+                </button>
+            </div>
+        </section>
+    </main>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="spinner"></div>
+    </div>
+
+    <script src="learning-path-gemini.js"></script>
+    <script src="mains_script.js"></script>
+</body>
+</html>
